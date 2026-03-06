@@ -30,33 +30,27 @@ export async function POST(request: NextRequest) {
 
 
 
-    // Determine embed color based on event type (e.g., success=green, error=red, building=yellow)
-    let embedColor = 0x34d399; // Default Green for success
-    if (event.type.includes('error') || event.type.includes('fail')) {
-      embedColor = 0xef4444; // Red
-    } else if (event.type.includes('build')) {
-      embedColor = 0xfacc15; // Yellow
-    }
+    const eventTypeConfig: Record<string, { title: string; color: number }> = {
+      'deployment.created': { title: 'Deployment Created', color: 0x3b82f6 }, // Blue
+      'deployment.cleanup': { title: 'Deployment Cleanup', color: 0x6b7280 }, // Gray
+      'deployment.error': { title: 'Deployment Error', color: 0xef4444 }, // Red
+      'deployment.canceled': { title: 'Deployment Canceled', color: 0xf59e0b }, // Orange
+      'deployment.succeeded': { title: 'Deployment Succeeded', color: 0x22c55e }, // Green
+      'deployment.promoted': { title: 'Deployment Promoted', color: 0x8b5cf6 }, // Purple
+      'deployment.rollback': { title: 'Deployment Rollback', color: 0xf97316 }, // Orange
+      'deployment.checkrun.start': { title: 'Checkrun Started', color: 0x0ea5e9 }, // Light Blue
+      'deployment.checkrun.cancel': { title: 'Checkrun Canceled', color: 0x94a3b8 }, // Slate
+    };
+
+    const config = eventTypeConfig[event.type] || { title: `Vercel Deployment: ${event.type}`, color: 0xa8a29e };
 
     const discordMessage = {
       embeds: [
         {
-          title: `🚀 Vercel Deployment: ${event.type}`,
-          description: `**Project:** [${deployment.name}](https://${deployment.url}) \`${event.payload.target}\``,
+          title: `🚀 ${config.title}`,
+          description: `**Project:** [${deployment.name}](https://${deployment.url}) \`${event.payload.target}\`\n**Commit:** ${commitMsg}\n**Author:** ${author}`,
           url: `https://${deployment.url}`,
-          color: embedColor,
-          fields: [
-            {
-              name: "Commit",
-              value: commitMsg,
-              inline: false
-            },
-            {
-              name: "Author",
-              value: author,
-              inline: true
-            }
-          ],
+          color: config.color,
           timestamp: new Date().toISOString(),
           footer: {
             text: "Vercel Deploy Notifier",
@@ -73,14 +67,14 @@ export async function POST(request: NextRequest) {
               style: 5, // URL Links MUST be style 5
               label: "Visit",
               emoji: { name: "🔗" },
-              url: `https://${deployment.url}`
+              url: deployment.url ? `https://${deployment.url}` : 'https://vercel.com'
             },
             {
               type: 2, // Button
               style: 5, // URL Links MUST be style 5
               label: "Inspect",
               emoji: { name: "🔍" },
-              url: deployment.inspectorUrl
+              url: deployment.inspectorUrl || 'https://vercel.com'
             }
           ]
         }
