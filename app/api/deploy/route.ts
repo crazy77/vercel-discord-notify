@@ -23,7 +23,9 @@ export async function POST(request: NextRequest) {
     }
 
     const event = JSON.parse(payload);
+    console.log("🚀 ~ POST ~ event:", event)
     const deployment = event.payload.deployment;
+    console.log("🚀 ~ POST ~ deployment:", deployment)
     
     const commitMsg = (deployment.meta.gitCommitMessage ?? deployment.meta.githubCommitMessage)?.slice(0, 50) ?? 'No commit message';
     const author = deployment.meta.gitCommitAuthorName ?? deployment.meta.githubCommitAuthorName ?? 'Unknown author';
@@ -44,12 +46,15 @@ export async function POST(request: NextRequest) {
 
     const config = eventTypeConfig[event.type] || { title: `Vercel Deployment: ${event.type}`, color: 0xa8a29e };
 
+    const visitUrl = deployment.url ? `https://${deployment.url}` : 'https://vercel.com/dashboard';
+    const inspectUrl = deployment.inspectorUrl ? (deployment.inspectorUrl.startsWith('http') ? deployment.inspectorUrl : `https://${deployment.inspectorUrl}`) : 'https://vercel.com/dashboard';
+
     const discordMessage = {
       embeds: [
         {
           title: `🚀 ${config.title}`,
-          description: `**Project:** [${deployment.name}](https://${deployment.url}) \`${event.payload.target}\`\n**Commit:** ${commitMsg}\n**Author:** ${author}`,
-          url: `https://${deployment.url}`,
+          description: `**Project:** [${deployment.name}](${visitUrl}) \`${event.payload.target}\`\n**Commit:** ${commitMsg}\n**Author:** ${author}`,
+          url: visitUrl,
           color: config.color,
           timestamp: new Date().toISOString(),
           footer: {
@@ -67,14 +72,14 @@ export async function POST(request: NextRequest) {
               style: 5, // URL Links MUST be style 5
               label: "Visit",
               emoji: { name: "🔗" },
-              url: deployment.url ? `https://${deployment.url}` : 'https://vercel.com'
+              url: visitUrl
             },
             {
               type: 2, // Button
               style: 5, // URL Links MUST be style 5
               label: "Inspect",
               emoji: { name: "🔍" },
-              url: deployment.inspectorUrl || 'https://vercel.com'
+              url: inspectUrl
             }
           ]
         }
