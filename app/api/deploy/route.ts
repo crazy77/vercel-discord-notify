@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const event = JSON.parse(payload);
+    console.log("🚀 ~ POST ~ event:", event)
     const deployment = event.payload.deployment;
     
     const discordMessage = {
