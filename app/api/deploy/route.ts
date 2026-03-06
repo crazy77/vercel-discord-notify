@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
     const event = JSON.parse(payload);
     console.log("🚀 ~ POST ~ event:", event)
     const deployment = event.payload.deployment;
+    console.log("🚀 ~ POST ~ deployment:", deployment)
     
     const discordMessage = {
       content: `**${deployment.meta.gitCommitMessage?.slice(0, 50)}**`+
