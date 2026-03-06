@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       embeds: [
         {
           title: `🚀 ${config.title}`,
-          description: `**Project:** [${deployment.name}](${visitUrl}) \`${event.payload.target}\`\n**Commit:** ${commitMsg}\n**Author:** ${author}`,
+          description: `**Project:** [${deployment.name}](${visitUrl}) ${event.payload.target ? `\`${event.payload.target}\`` : ''}\n**Commit:** ${commitMsg}\n**Author:** ${author}`,
           url: visitUrl,
           color: config.color,
           timestamp: new Date().toISOString(),
@@ -88,8 +88,11 @@ export async function POST(request: NextRequest) {
 
     // The image property in the embed is intentionally set to API OG URL.
     // If it resolves, Discord will display it. If not, Discord will just ignore it.
+
+    const webhookUrl = new URL(process.env.DISCORD_WEBHOOK_URL ?? '');
+    webhookUrl.searchParams.set('with_components', 'true');
     
-    await fetch(process.env.DISCORD_WEBHOOK_URL??'', {
+    await fetch(webhookUrl.toString(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(discordMessage),
