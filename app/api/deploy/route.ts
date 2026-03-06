@@ -25,11 +25,16 @@ export async function POST(request: NextRequest) {
     const event = JSON.parse(payload);
     const deployment = event.payload.deployment;
     
+    const commitMsg = (deployment.meta.gitCommitMessage ?? deployment.meta.githubCommitMessage)?.slice(0, 50) ?? 'No commit message';
+    const author = deployment.meta.gitCommitAuthorName ?? deployment.meta.githubCommitAuthorName ?? 'Unknown author';
+
     const discordMessage = {
-      content: `**${(deployment.meta.gitCommitMessage??deployment.meta.githubCommitMessage)?.slice(0, 50)}** ${event.type}\n`+
-               `${deployment.name} by ${deployment.meta.gitCommitAuthorName??deployment.meta.githubCommitAuthorName} on ${event.payload.target}\n` +
-               `[Inspect](${deployment.inspectorUrl})\n` +
-               `[Visit](https://${deployment.url})`
+      content: `🚀 **Vercel Deployment: \`${event.type}\`**\n` +
+               `> **Project:** \`${deployment.name}\` \`${event.payload.target}\`\n` +
+               `> **Commit:** ${commitMsg}\n` +
+               `> **Author:** ${author}\n` +
+               `> \n` +
+               `> 🔗 [Visit](https://${deployment.url})  |  🔍 [Inspect](${deployment.inspectorUrl})`
     };
 
     await fetch(process.env.DISCORD_WEBHOOK_URL??'', {
