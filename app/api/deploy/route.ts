@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const deployment = event.payload.deployment;
     
     const discordMessage = {
-      content: `💬 **${deployment.meta.gitCommitMessage?.slice(0, 50)}**`+
+      content: `**${deployment.meta.gitCommitMessage?.slice(0, 50)}**`+
                `🚀 **${event.type.replace('deployment.', '').toUpperCase()}** \n` +
                `📱 ${deployment.name}\n` +
                `🌐 ${event.payload.target}\n` +
