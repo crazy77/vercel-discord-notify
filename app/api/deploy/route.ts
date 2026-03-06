@@ -28,13 +28,13 @@ export async function POST(request: NextRequest) {
     console.log("🚀 ~ POST ~ deployment:", deployment)
     
     const discordMessage = {
-      content: `**${deployment.meta.gitCommitMessage?.slice(0, 50)}**`+
+      content: `**${(deployment.meta.gitCommitMessage??deployment.meta.githubCommitMessage)?.slice(0, 50)}**`+
                `🚀 **${event.type.replace('deployment.', '').toUpperCase()}** \n` +
                `📱 ${deployment.name}\n` +
                `🌐 ${event.payload.target}\n` +
-               `🔗 https://${deployment.url}\n` +
-               `👤 ${deployment.meta.gitCommitAuthorName}\n` +
-               `🔗 [배포 상황](${deployment.inspectorUrl})`
+               `👤 ${deployment.meta.gitCommitAuthorName??deployment.meta.githubCommitAuthorName}\n` +
+               `🔗 [배포 상황](${deployment.inspectorUrl})\n` +
+               `🔗 https://${deployment.url}`
     };
 
     await fetch(process.env.DISCORD_WEBHOOK_URL??'', {
